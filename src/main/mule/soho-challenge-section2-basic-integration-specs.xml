@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+<flow name="soho-challenge-section2-basic-integration-specs-main">
+        <http:listener config-ref="soho-challenge-section2-basic-integration-specs-httpListenerConfig" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="soho-challenge-section2-basic-integration-specs-config" />
+		<error-handler ref="Global_Error_Handler" />
+    </flow>
+    <flow name="soho-challenge-section2-basic-integration-specs-console">
+        <http:listener config-ref="soho-challenge-section2-basic-integration-specs-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="soho-challenge-section2-basic-integration-specs-config" />
+		<error-handler ref="Console_Error_Handler" />
+    </flow>
+    <flow name="put:\basic-integration:application\json:soho-challenge-section2-basic-integration-specs-config">
+        <logger level="INFO" message="put:\basic-integration:application\json:soho-challenge-section2-basic-integration-specs-config" />
+		<db:update doc:name="Update User" doc:id="72708679-c789-4382-b171-398bbb76fef5" config-ref="Database_Config">
+			<db:sql ><![CDATA[UPDATE user_test SET username=:username, email=:email,
+name=:name, lastname=:lastname, age=:age WHERE id = :id]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	id: payload.id,
+	username: payload.username,
+	email: payload.email,
+	name: payload.data.name,
+	lastname: payload.data.lastname,
+	age: payload.data.age
+}]]]></db:input-parameters>
+		</db:update>
+    </flow>
+    <flow name="delete:\basic-integration:soho-challenge-section2-basic-integration-specs-config">
+        <logger level="INFO" message="delete:\basic-integration:soho-challenge-section2-basic-integration-specs-config" />
+		<db:delete doc:name="Delete Users" doc:id="ba9f30fe-f6b6-475a-ab04-7e49233ffd1f" config-ref="Database_Config">
+			<db:sql ><![CDATA[DELETE FROM user_test]]></db:sql>
+		</db:delete>
+    </flow>
+    <flow name="delete:\basic-integration\(id):soho-challenge-section2-basic-integration-specs-config">
+        <ee:transform doc:name="Transform Message">
+            <ee:variables>
+                <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <logger level="INFO" message="delete:\basic-integration\(id):soho-challenge-section2-basic-integration-specs-config" />
+		<db:delete doc:name="Delete Users" doc:id="c61435cc-f595-4f06-a9dc-ea311854ca0e" config-ref="Database_Config" >
+			<db:sql ><![CDATA[DELETE FROM user_test WHERE id=:id]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	id: vars.id default null
+}]]]></db:input-parameters>
+		</db:delete>
+    </flow>
+    <flow name="get:\basic-integration:soho-challenge-section2-basic-integration-specs-config">
+        <ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+[
+  {
+    id: "123456789123456789abcdefg",
+    email: "user12@gmail.com",
+    username: "user12"
+  }, 
+  {
+    id: "123456789123456789abcdefp",
+    email: "user343@gmail.com",
+    username: "user343"
+  }
+] as Array {encoding: "UTF-8", mediaType: "application/json"}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<db:select doc:name="Select Users" doc:id="baf16dc8-0a53-40ed-b64e-4e3111fd68d8" config-ref="Database_Config">
+			<db:sql ><![CDATA[SELECT * FROM user_test]]></db:sql>
+		</db:select>
+    </flow>
+    <flow name="get:\basic-integration\(id):soho-challenge-section2-basic-integration-specs-config">
+        <ee:transform doc:name="Transform Message">
+            <ee:variables>
+                <ee:set-variable variableName="id">attributes.uriParams.'id'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+		<db:select doc:name="Select User" doc:id="7df101d4-3717-4423-972e-3edc1c571c18" config-ref="Database_Config" >
+			<db:sql ><![CDATA[SELECT * FROM user_test WHERE id = :id]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	id: vars.id
+}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  id: "123456789123456789abcdef9",
+  email: "user343@gmail.com",
+  username: "user343",
+  password: "123456789",
+  data: {
+    name: "Luis",
+    lastname: "Rivera",
+    age: 23
+  }
+} as Object {encoding: "UTF-8", mediaType: "application/json"}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="post:\basic-integration:application\json:soho-challenge-section2-basic-integration-specs-config">
+        <logger level="INFO" message="post:\basic-integration:application\json:soho-challenge-section2-basic-integration-specs-config" />
+		<db:insert doc:name="Insert User" doc:id="136bb2f8-a949-4736-a997-1f0925c8242f" config-ref="Database_Config">
+			<db:sql ><![CDATA[INSERT INTO user_test(id, username, email, password, name, lastname, age) 
+VALUES (:id, :username, :email, :password, :name, :lastname, :age)]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	id: uuid(),
+	username: payload.username,
+	email: payload.email,
+	password: payload.password,
+	name: payload.data.name,
+	lastname: payload.data.lastname,
+	age: payload.data.age
+}]]]></db:input-parameters>
+		</db:insert>
+    </flow>
+</mule>

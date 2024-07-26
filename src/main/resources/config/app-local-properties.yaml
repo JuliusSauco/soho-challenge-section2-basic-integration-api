@@ -1,0 +1,7 @@
+config:
+  database:
+    host: 'localhost'
+    port: '3306'
+    name: 'example'
+    username: 'umskuqh3b2l0iohm'
+    password: 'GJ20XxoGYMczaVwuQKPR'

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+    <http:listener-config name="soho-challenge-section2-basic-integration-specs-httpListenerConfig">
+        <http:listener-connection host="0.0.0.0" port="8081" />
+    </http:listener-config>
+    <apikit:config name="soho-challenge-section2-basic-integration-specs-config" api="resource::3b944df6-914b-40a9-9e51-5b67b42581c4:soho-challenge-section2-basic-integration-specs:1.0.0:raml:zip:soho-challenge-section2-basic-integration-specs.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="7060b0c3-b130-4c7e-a328-9480187f7654" >
+		<db:my-sql-connection host="${config.database.host}" port="${config.database.port}" user="${config.database.username}" password="${config.database.password}" database="${config.database.name}" />
+	</db:config>
+	<global-property doc:name="Global Property" doc:id="938c7913-778d-4a96-944c-1fcca0e16667" name="env" value="dev" />
+	<configuration-properties doc:name="Configuration properties" doc:id="d0e4b572-b8f6-436e-bb03-c3139d4fcb4a" file="config/app-${env}-properties.yaml" />	
+
+</mule>
